@@ -1,0 +1,12 @@
+{
+  "id": "ortho-knee-arthroplasty-DEPRECATED",
+  "title": "【已废弃】请改用 ortho-common.json + kb/diseases/tka-knee.json",
+  "deprecated": true,
+  "replacedBy": {
+    "common": "kb/ortho-common.json",
+    "disease": "kb/diseases/tka-knee.json",
+    "fallback": "kb/diseases/ortho-generic-postop.json"
+  },
+  "note": "CareLoop 2.1 起不再加载本文件。运行时从 classpath kb/ortho-common.json 与 kb/diseases/*.json 组装统一随访表。本文件仅保留以免旧文档链接 404。",
+  "version": "deprecated-2.1"
+}

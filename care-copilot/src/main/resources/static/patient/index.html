@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>智能随访系统</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #f0f5fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .hidden { display: none !important; }
+
+    /* ===== 登录页 ===== */
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 20px 60px rgba(0, 40, 80, 0.15);
+      padding: 36px 28px 32px;
+    }
+    .login-card .brand {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0a4bb3;
+    }
+    .login-card .sub {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #7a94b0;
+      line-height: 1.55;
+    }
+    .code-input {
+      width: 100%;
+      margin-top: 22px;
+      letter-spacing: .4em;
+      text-align: center;
+      font-size: 28px;
+      font-weight: 700;
+      padding: 14px;
+      border-radius: 16px;
+      border: 2px solid #e6eef8;
+      background: #f8fbff;
+      color: #1a2a3a;
+      outline: none;
+    }
+    .code-input:focus { border-color: #1a6dff; }
+    .btn-login {
+      width: 100%;
+      margin-top: 16px;
+      background: #1a6dff;
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 28px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(26, 109, 255, 0.3);
+    }
+    .btn-login:disabled { opacity: .6; cursor: not-allowed; }
+    .login-err { color: #ff6b6b; font-size: 13px; margin-top: 10px; min-height: 18px; }
+
+    .chat-container {
+      width: 100%;
+      max-width: 480px;
+      height: 780px;
+      max-height: 95vh;
+      background: #ffffff;
+      border-radius: 32px;
+      box-shadow: 0 20px 60px rgba(0, 40, 80, 0.15);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+    .header {
+      background: linear-gradient(135deg, #1a6dff 0%, #0a4bb3 100%);
+      padding: 18px 20px 14px;
+      color: #fff;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .header-top { display: flex; justify-content: space-between; align-items: center; }
+    .header-title {
+      font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px;
+    }
+    .header-title .badge {
+      font-size: 11px; background: rgba(255,255,255,.25); padding: 2px 10px; border-radius: 20px; font-weight: 400;
+    }
+    .header-patient { font-size: 12px; opacity: .85; margin-top: 2px; }
+    .header-actions button {
+      background: rgba(255,255,255,.2); border: none; color: #fff;
+      width: 34px; height: 34px; border-radius: 50%; font-size: 16px; cursor: pointer;
+    }
+    .mode-tabs {
+      display: flex; background: rgba(255,255,255,.15); border-radius: 30px; padding: 4px;
+    }
+    .mode-tab {
+      flex: 1; padding: 8px 0; text-align: center; font-size: 14px; font-weight: 500;
+      border: none; border-radius: 26px; cursor: pointer; background: transparent;
+      color: rgba(255,255,255,.7); transition: all .35s cubic-bezier(.34,1.56,.64,1);
+    }
+    .mode-tab.active {
+      background: #fff; color: #0a4bb3; box-shadow: 0 4px 12px rgba(0,0,0,.12);
+    }
+    .content-area { flex: 1; overflow-y: auto; background: #f8fcff; position: relative; }
+    .chat-messages {
+      padding: 20px 16px 12px; display: flex; flex-direction: column; gap: 12px; min-height: 100%;
+    }
+    .message {
+      display: flex; flex-direction: column; max-width: 88%;
+      animation: msgFadeIn .4s ease forwards; opacity: 0; transform: translateY(12px);
+    }
+    @keyframes msgFadeIn { to { opacity: 1; transform: translateY(0); } }
+    .message.system { align-self: flex-start; }
+    .message.user { align-self: flex-end; }
+    .message .bubble {
+      padding: 12px 16px; border-radius: 18px; font-size: 15px; line-height: 1.6;
+      word-break: break-word; box-shadow: 0 2px 8px rgba(0,0,0,.04); white-space: pre-wrap;
+    }
+    .message.system .bubble {
+      background: #e9f0f8; color: #1a2a3a; border-bottom-left-radius: 4px;
+    }
+    .message.user .bubble {
+      background: #1a6dff; color: #fff; border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 12px rgba(26,109,255,.25);
+    }
+    .message .time { font-size: 11px; color: #8a9cb0; margin-top: 4px; padding: 0 4px; }
+    .message.user .time { text-align: right; }
+    .message.system .bubble .tag {
+      display: inline-block; font-size: 11px; font-weight: 600; color: #0a4bb3;
+      background: rgba(26,109,255,.12); padding: 2px 8px; border-radius: 10px; margin-bottom: 6px;
+    }
+
+    .dashboard { padding: 20px 16px; display: flex; flex-direction: column; gap: 20px; }
+    .device-connect {
+      background: #eef6ff; border-radius: 20px; padding: 24px 16px; text-align: center;
+      border: 2px dashed #b0c8dd;
+    }
+    .device-connect .icon-big { font-size: 48px; margin-bottom: 12px; }
+    .device-connect .status-text { font-size: 16px; color: #1a2a3a; font-weight: 500; }
+    .device-connect .sub-text { font-size: 14px; color: #7a94b0; margin-top: 6px; }
+    .btn-connect {
+      margin-top: 16px; background: #1a6dff; color: #fff; border: none;
+      padding: 12px 32px; border-radius: 30px; font-size: 16px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 4px 12px rgba(26,109,255,.3);
+    }
+    .btn-connect:disabled { opacity: .6; cursor: not-allowed; }
+    .device-data { display: none; flex-direction: column; gap: 16px; }
+    .device-data.visible { display: flex; }
+    .device-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #eef6ff; padding: 12px 16px; border-radius: 16px; color: #0a4bb3; font-weight: 500;
+    }
+    .device-header .status { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+    .device-header .status .dot {
+      width: 10px; height: 10px; border-radius: 50%; background: #34c759;
+      animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; } 50% { opacity: .5; }
+    }
+    .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .metric-card {
+      background: #fff; border-radius: 20px; padding: 14px; box-shadow: 0 4px 16px rgba(0,0,0,.04);
+      border: 1px solid #ecf2f8;
+    }
+    .metric-card.full { grid-column: 1 / -1; }
+    .metric-card .label { font-size: 13px; color: #7a94b0; margin-bottom: 6px; }
+    .metric-card .value { font-size: 26px; font-weight: 700; color: #1a2a3a; }
+    .metric-card .sub { font-size: 12px; color: #8a9cb0; margin-top: 2px; }
+    .last-sync { text-align: center; font-size: 12px; color: #b0c8dd; }
+
+    .chat-input-area {
+      flex-shrink: 0; padding: 12px 16px 16px; background: #fff;
+      border-top: 1px solid #eef3f8; display: flex; align-items: flex-end; gap: 10px;
+    }
+    .inline-form {
+      margin-top: 8px; background: #f0f6ff; border: 1px solid #d6e4f0;
+      border-radius: 14px; padding: 10px 12px; max-width: 100%;
+    }
+    .message.system { max-width: 94%; }
+    .form-section { font-weight:700; color:#0f6b5a; margin:10px 0 6px; font-size:13px; }
+    .form-item { margin-bottom: 10px; }
+    .form-item .flabel { font-size: 13px; font-weight: 600; color: #0a4bb3; margin-bottom: 6px; }
+    .opt-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .opt {
+      border: 1px solid #d6e4f0; background: #fff; color: #1a2a3a;
+      border-radius: 16px; padding: 5px 10px; font-size: 12px; cursor: pointer;
+    }
+    .opt.on { background: #1a6dff; color: #fff; border-color: #1a6dff; }
+    .form-item .custom {
+      margin-top: 6px; width: 100%; border: 1px solid #e6eef8; border-radius: 12px;
+      padding: 6px 10px; font-size: 12px; font-family: inherit; outline: none; box-sizing: border-box;
+    }
+    .form-submit {
+      margin-top: 6px; width: 100%; border: none; background: #1a6dff; color: #fff;
+      border-radius: 20px; padding: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+    .skip-link {
+      margin-top: 8px; text-align: center; font-size: 13px; color: #7a94b0; cursor: pointer;
+    }
+    .skip-panel { margin-top: 8px; }
+    .skip-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .skip-cancel {
+      flex: 1; border: 1px solid #e6eef8; background: #fff; border-radius: 20px;
+      padding: 8px; font-size: 13px; color: #7a94b0; cursor: pointer;
+    }
+    .form-item.hidden-by-showif { display: none !important; }
+    .chat-input-area.hidden { display: none; }
+    .input-wrapper {
+      flex: 1; display: flex; align-items: flex-end; background: #f2f7fc;
+      border-radius: 24px; padding: 4px 6px 4px 16px; border: 2px solid transparent;
+    }
+    .input-wrapper:focus-within {
+      border-color: #1a6dff; box-shadow: 0 0 0 4px rgba(26,109,255,.1); background: #fff;
+    }
+    .chat-input-area textarea {
+      flex: 1; border: none; background: transparent; padding: 10px 0; font-size: 15px;
+      font-family: inherit; resize: none; outline: none; line-height: 1.5;
+      max-height: 120px; min-height: 24px; color: #1a2a3a;
+    }
+    .send-btn {
+      width: 44px; height: 44px; border-radius: 50%; border: none; background: #1a6dff;
+      color: #fff; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(26,109,255,.3);
+    }
+    .send-btn:disabled { background: #b8cce0; cursor: not-allowed; box-shadow: none; }
+    .empty-hint {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100%; color: #99b0c8; font-size: 14px; text-align: center; gap: 8px; padding: 20px;
+    }
+    .empty-hint .icon { font-size: 48px; opacity: .6; }
+    .reset-fab {
+      position: absolute; bottom: 90px; right: 20px; background: #fff; border: 1px solid #eef3f8;
+      width: 44px; height: 44px; border-radius: 50%; box-shadow: 0 4px 16px rgba(0,0,0,.1);
+      font-size: 18px; cursor: pointer; color: #1a6dff; z-index: 10;
+    }
+
+    @media (max-width: 520px) {
+      body { padding: 0; }
+      .chat-container, .login-card {
+        max-height: 100vh; height: 100vh; border-radius: 0; box-shadow: none; max-width: none;
+      }
+      .login-card { display: flex; flex-direction: column; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 登录：8 位病患码 -->
+<div class="login-card" id="loginView">
+  <div class="brand">智能随访系统</div>
+  <div class="sub">请输入医生在飞书发放的 <b>8 位专属病患码</b>，系统将按出院随访计划向您发送术后随访表。</div>
+  <input id="codeInput" class="code-input" maxlength="8" inputmode="numeric" placeholder="________" autocomplete="one-time-code" />
+  <button class="btn-login" id="btnLogin">进入随访</button>
+  <div class="login-err" id="loginErr"></div>
+</div>
+
+<!-- 主界面 -->
+<div class="chat-container hidden" id="app">
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="header-title">
+          智能随访
+          <span class="badge" id="modeBadge">助手</span>
+        </div>
+        <div class="header-patient" id="patientLine">—</div>
+      </div>
+      <div class="header-actions">
+        <button id="logoutBtn" title="退出登录" aria-label="退出">⎋</button>
+      </div>
+    </div>
+    <div class="mode-tabs" role="tablist">
+      <button class="mode-tab active" data-mode="followup" role="tab">🩺 随访助手</button>
+      <button class="mode-tab" data-mode="device" role="tab">⌚ 外接设备</button>
+    </div>
+  </div>
+
+  <div class="content-area" id="contentArea">
+    <div id="chatMessages" class="chat-messages">
+      <div class="empty-hint" id="emptyHint">
+        <div class="icon">💬</div>
+        <div>正在加载您的随访计划…</div>
+        <div style="font-size:12px;color:#b8cce0;">到点后系统会推送术后随访表</div>
+      </div>
+    </div>
+
+    <div id="dashboardPanel" class="dashboard hidden">
+      <div class="device-connect" id="deviceConnect">
+        <div class="icon-big">⌚</div>
+        <div class="status-text" id="connectStatusText">未连接</div>
+        <div class="sub-text">模拟蓝牙连接健康手环，同步心率、血压、血氧等数据</div>
+        <button class="btn-connect" id="connectBtn">🔗 连接手环</button>
+      </div>
+      <div class="device-data" id="deviceData">
+        <div class="device-header">
+          <span>⌚ 健康手环 · 模拟数据</span>
+          <span class="status"><span class="dot"></span> 已连接</span>
+        </div>
+        <div class="metric-grid" id="metricGrid"></div>
+        <div class="last-sync" id="lastSync">⏱ 最后同步：—</div>
+        <button class="btn-connect" id="resyncBtn" style="align-self:center">再次同步</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input-area" id="inputArea">
+    <div class="input-wrapper">
+      <textarea id="msgInput" rows="1" placeholder="其他补充说明（选填）…" aria-label="输入消息"></textarea>
+    </div>
+    <button class="send-btn" id="sendBtn" aria-label="发送">➤</button>
+  </div>
+  <button class="reset-fab" id="refreshFab" title="刷新随访任务">↻</button>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const state = {
+    patientId: null,
+    name: '',
+    diagnosis: '',
+    code: '',
+    pendingTaskId: null,
+    pendingForm: null,
+    askedTaskIds: new Set(),
+    mode: 'followup',
+    processing: false,
+    deviceConnected: false
+  };
+
+  const el = {
+    loginView: document.getElementById('loginView'),
+    app: document.getElementById('app'),
+    codeInput: document.getElementById('codeInput'),
+    btnLogin: document.getElementById('btnLogin'),
+    loginErr: document.getElementById('loginErr'),
+    patientLine: document.getElementById('patientLine'),
+    modeBadge: document.getElementById('modeBadge'),
+    chatMessages: document.getElementById('chatMessages'),
+    emptyHint: document.getElementById('emptyHint'),
+    dashboardPanel: document.getElementById('dashboardPanel'),
+    inputArea: document.getElementById('inputArea'),
+    msgInput: document.getElementById('msgInput'),
+    sendBtn: document.getElementById('sendBtn'),
+    connectBtn: document.getElementById('connectBtn'),
+    resyncBtn: document.getElementById('resyncBtn'),
+    deviceConnect: document.getElementById('deviceConnect'),
+    deviceData: document.getElementById('deviceData'),
+    connectStatusText: document.getElementById('connectStatusText'),
+    metricGrid: document.getElementById('metricGrid'),
+    lastSync: document.getElementById('lastSync'),
+    logoutBtn: document.getElementById('logoutBtn'),
+    refreshFab: document.getElementById('refreshFab')
+  };
+
+  function timeNow() {
+    const d = new Date();
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+
+  function scrollChat() {
+    setTimeout(() => { el.chatMessages.scrollTop = el.chatMessages.scrollHeight; }, 40);
+  }
+
+  function autoResize() {
+    el.msgInput.style.height = 'auto';
+    el.msgInput.style.height = Math.min(el.msgInput.scrollHeight, 120) + 'px';
+  }
+
+  function addBubble(role, text, tag, form) {
+    el.emptyHint.classList.add('hidden');
+    document.querySelectorAll('.inline-form[data-active="1"]').forEach(p => {
+      p.dataset.active = '0';
+      p.querySelectorAll('.opt,.custom,.form-submit').forEach(n => {
+        if (n.classList.contains('form-submit')) n.remove();
+        else n.style.pointerEvents = 'none';
+      });
+    });
+    const div = document.createElement('div');
+    div.className = 'message ' + (role === 'user' ? 'user' : 'system');
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    if (tag) {
+      const t = document.createElement('div');
+      t.className = 'tag';
+      t.textContent = tag;
+      bubble.appendChild(t);
+    }
+    const body = document.createElement('div');
+    body.textContent = text;
+    bubble.appendChild(body);
+    div.appendChild(bubble);
+    if (form && form.items && form.items.length) {
+      const panel = document.createElement('div');
+      panel.className = 'inline-form';
+      panel.dataset.active = '1';
+      panel.innerHTML = buildFormHtml(form);
+      bindFormPanel(panel);
+      div.appendChild(panel);
+      state.pendingForm = form;
+      state.activeFormPanel = panel;
+    }
+    const tm = document.createElement('div');
+    tm.className = 'time';
+    tm.textContent = timeNow();
+    div.appendChild(tm);
+    el.chatMessages.appendChild(div);
+    scrollChat();
+  }
+
+  function buildFormHtml(form) {
+    const prompt = form.prompt || '请逐项选择，并可补充描述';
+    let html = '<div style="font-size:12px;color:#7a94b0;margin-bottom:8px;">' + prompt + '</div>';
+    html += '<div class="form-body">';
+    form.items.forEach((item, idx) => {
+      if (item.type === 'section') {
+        html += '<div class="form-item form-section-wrap" data-idx="' + idx + '" data-id="'
+          + (item.id || idx) + '" data-type="section">';
+        html += '<div class="form-section">' + (item.label || '') + '</div></div>';
+        return;
+      }
+      const multi = !!item.multi;
+      const exclusive = !!item.exclusive;
+      const showIf = item.showIf ? encodeURIComponent(JSON.stringify(item.showIf)) : '';
+      html += '<div class="form-item" data-idx="' + idx + '" data-id="' + (item.id || idx)
+        + '" data-label="' + (item.label || '') + '" data-multi="' + (multi ? '1' : '0')
+        + '" data-exclusive="' + (exclusive ? '1' : '0')
+        + '" data-required="' + ((item.required !== false && item.type !== 'text') ? '1' : '0')
+        + '" data-showif="' + showIf + '">';
+      html += '<div class="flabel">' + (item.label || ('项目' + (idx + 1))) + (multi ? '（可多选）' : '') + '</div>';
+      if (item.options && item.options.length) {
+        html += '<div class="opt-row">';
+        item.options.forEach(opt => {
+          html += '<button type="button" class="opt" data-opt="' + opt + '">' + opt + '</button>';
+        });
+        html += '</div>';
+      }
+      if (item.allowCustom !== false || item.type === 'text') {
+        html += '<input class="custom" placeholder="' + (item.customHint || '补充描述（选填）') + '" />';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+    const skips = (form.skipReasons && form.skipReasons.length)
+      ? form.skipReasons
+      : ['太累/疼痛无法填写', '外出不在家', '已住院/急诊', '其他'];
+    html += '<div class="skip-link" data-role="open-skip">今日跳过</div>';
+    html += '<div class="skip-panel hidden" data-role="skip-panel">';
+    html += '<div class="flabel">今日跳过原因</div><div class="opt-row">';
+    skips.forEach(r => {
+      html += '<button type="button" class="opt skip-opt" data-opt="' + r + '">' + r + '</button>';
+    });
+    html += '</div><div class="skip-actions">';
+    html += '<button type="button" class="skip-cancel" data-role="cancel-skip">取消</button>';
+    html += '<button type="button" class="form-submit" data-role="confirm-skip">确认跳过</button>';
+    html += '</div></div>';
+    html += '<button type="button" class="form-submit" data-role="submit-form">提交本次回答</button>';
+    return html;
+  }
+
+  function isNoneOpt(opt) {
+    return !!opt && (opt === '无以上情况' || opt.indexOf('无以上') === 0);
+  }
+
+  function refreshShowIf(panel) {
+    const chosenById = {};
+    panel.querySelectorAll('.form-item[data-id]').forEach(row => {
+      if (row.dataset.type === 'section') return;
+      const id = row.dataset.id;
+      const chosen = [];
+      row.querySelectorAll('.opt.on:not(.skip-opt)').forEach(b => chosen.push(b.dataset.opt));
+      chosenById[id] = chosen;
+    });
+    panel.querySelectorAll('.form-item[data-showif]').forEach(row => {
+      const raw = row.dataset.showif;
+      if (!raw) {
+        row.classList.remove('hidden-by-showif');
+        return;
+      }
+      let cond;
+      try { cond = JSON.parse(decodeURIComponent(raw)); } catch (e) { return; }
+      let ok = true;
+      Object.keys(cond || {}).forEach(key => {
+        const want = cond[key] || [];
+        const chosen = chosenById[key] || [];
+        if (!want.some(v => chosen.indexOf(v) >= 0)) ok = false;
+      });
+      row.classList.toggle('hidden-by-showif', !ok);
+    });
+  }
+
+  function bindFormPanel(panel) {
+    panel.querySelectorAll('.form-item .opt:not(.skip-opt)').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (panel.dataset.active !== '1') return;
+        const row = btn.closest('.form-item');
+        const multi = row.dataset.multi === '1';
+        const exclusive = row.dataset.exclusive === '1';
+        const opt = btn.dataset.opt;
+        if (exclusive && multi) {
+          if (isNoneOpt(opt)) {
+            row.querySelectorAll('.opt').forEach(b => b.classList.remove('on'));
+            btn.classList.add('on');
+          } else {
+            row.querySelectorAll('.opt').forEach(b => {
+              if (isNoneOpt(b.dataset.opt)) b.classList.remove('on');
+            });
+            btn.classList.toggle('on');
+          }
+        } else if (!multi) {
+          row.querySelectorAll('.opt').forEach(b => b.classList.remove('on'));
+          btn.classList.add('on');
+        } else {
+          btn.classList.toggle('on');
+        }
+        refreshShowIf(panel);
+      });
+    });
+    const openSkip = panel.querySelector('[data-role="open-skip"]');
+    const skipPanel = panel.querySelector('[data-role="skip-panel"]');
+    const body = panel.querySelector('.form-body');
+    const submitForm = panel.querySelector('[data-role="submit-form"]');
+    if (openSkip && skipPanel) {
+      openSkip.addEventListener('click', () => {
+        if (panel.dataset.active !== '1') return;
+        skipPanel.classList.remove('hidden');
+        if (body) body.classList.add('hidden');
+        if (submitForm) submitForm.classList.add('hidden');
+        openSkip.classList.add('hidden');
+      });
+    }
+    const cancelSkip = panel.querySelector('[data-role="cancel-skip"]');
+    if (cancelSkip) {
+      cancelSkip.addEventListener('click', () => {
+        skipPanel.classList.add('hidden');
+        if (body) body.classList.remove('hidden');
+        if (submitForm) submitForm.classList.remove('hidden');
+        if (openSkip) openSkip.classList.remove('hidden');
+      });
+    }
+    panel.querySelectorAll('.skip-opt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        panel.querySelectorAll('.skip-opt').forEach(b => b.classList.remove('on'));
+        btn.classList.add('on');
+      });
+    });
+    const confirmSkip = panel.querySelector('[data-role="confirm-skip"]');
+    if (confirmSkip) confirmSkip.addEventListener('click', () => sendSkip());
+    if (submitForm) submitForm.addEventListener('click', () => sendAnswer());
+    refreshShowIf(panel);
+  }
+
+  function collectFormPayload() {
+    const panel = state.activeFormPanel;
+    if (!panel || panel.dataset.active !== '1') return null;
+    const selections = [];
+    panel.querySelectorAll('.form-item').forEach(row => {
+      if (row.dataset.type === 'section') return;
+      if (row.classList.contains('hidden-by-showif')) return;
+      const chosen = [];
+      row.querySelectorAll('.opt.on:not(.skip-opt)').forEach(b => chosen.push(b.dataset.opt));
+      const customEl = row.querySelector('.custom');
+      const custom = customEl ? customEl.value.trim() : '';
+      if (!chosen.length && !custom) return;
+      selections.push({
+        id: row.dataset.id,
+        label: row.dataset.label,
+        chosen: chosen,
+        custom: custom
+      });
+    });
+    const note = el.msgInput.value.trim();
+    if (!selections.length && !note) return null;
+    return { selections, note };
+  }
+
+  function missingRequiredLabels(panel) {
+    const missing = [];
+    if (!panel) return missing;
+    panel.querySelectorAll('.form-item').forEach(row => {
+      if (row.dataset.type === 'section') return;
+      if (row.classList.contains('hidden-by-showif')) return;
+      if (row.dataset.required !== '1') return;
+      const chosen = row.querySelectorAll('.opt.on:not(.skip-opt)').length;
+      const customEl = row.querySelector('.custom');
+      const custom = customEl ? customEl.value.trim() : '';
+      if (!chosen && !custom) missing.push(row.dataset.label || row.dataset.id);
+    });
+    return missing;
+  }
+
+  async function sendAnswer() {
+    if (state.processing || state.mode !== 'followup') return;
+    if (!state.patientId) return;
+    if (state.activeFormPanel) {
+      const missing = missingRequiredLabels(state.activeFormPanel);
+      if (missing.length) {
+        alert('请完成必填项：' + missing[0]);
+        return;
+      }
+    }
+    const formPayload = collectFormPayload();
+    const freeText = el.msgInput.value.trim();
+    if (!formPayload && !freeText) return;
+    state.processing = true;
+    el.sendBtn.disabled = true;
+    el.msgInput.disabled = true;
+    let display = freeText;
+    const body = { patientId: String(state.patientId) };
+    if (state.pendingTaskId) body.taskId = String(state.pendingTaskId);
+    if (formPayload) {
+      body.selections = formPayload.selections;
+      body.note = formPayload.note || '';
+      display = (formPayload.selections || []).map(s => {
+        const c = (s.chosen || []).join('、');
+        return s.label + '：' + c + (s.custom ? '（' + s.custom + '）' : '');
+      }).filter(Boolean).join('；') + (formPayload.note ? '；补充：' + formPayload.note : '');
+    } else {
+      body.text = freeText;
+    }
+    addBubble('user', display || freeText);
+    el.msgInput.value = '';
+    autoResize();
+    try {
+      const res = await fetch('/api/patient/mock/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || data.message || '发送失败');
+      if (data.assistantReply) addBubble('system', data.assistantReply);
+      if (data.alertCreated) {
+        addBubble('system', '系统已按风险级别通知医护（' + ((data.triage && data.triage.level) || '—') + '）');
+      }
+      if (state.pendingTaskId) state.askedTaskIds.add(String(state.pendingTaskId));
+      state.pendingTaskId = null;
+      if (state.activeFormPanel) {
+        state.activeFormPanel.dataset.active = '0';
+        const btn = state.activeFormPanel.querySelector('[data-role="submit-form"]');
+        if (btn) btn.remove();
+        state.activeFormPanel.querySelectorAll('.skip-link,.skip-panel').forEach(n => n.remove());
+      }
+      state.activeFormPanel = null;
+      state.pendingForm = null;
+      await pushNextPlanQuestion({ announceIdle: true });
+    } catch (e) {
+      addBubble('system', '发送失败：' + e.message);
+    } finally {
+      state.processing = false;
+      el.sendBtn.disabled = false;
+      el.msgInput.disabled = false;
+    }
+  }
+
+  async function sendSkip() {
+    if (state.processing || state.mode !== 'followup' || !state.patientId) return;
+    const panel = state.activeFormPanel;
+    if (!panel) return;
+    const picked = panel.querySelector('.skip-opt.on');
+    if (!picked) {
+      alert('请选择跳过原因');
+      return;
+    }
+    state.processing = true;
+    el.sendBtn.disabled = true;
+    const reason = picked.dataset.opt;
+    const body = {
+      patientId: String(state.patientId),
+      skipped: true,
+      skipReason: reason
+    };
+    if (state.pendingTaskId) body.taskId = String(state.pendingTaskId);
+    addBubble('user', '【今日跳过】' + reason);
+    try {
+      const res = await fetch('/api/patient/mock/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '发送失败');
+      if (data.assistantReply) addBubble('system', data.assistantReply);
+      if (state.pendingTaskId) state.askedTaskIds.add(String(state.pendingTaskId));
+      state.pendingTaskId = null;
+      if (state.activeFormPanel) {
+        state.activeFormPanel.dataset.active = '0';
+        state.activeFormPanel.querySelectorAll('.form-submit,.skip-link,.skip-panel').forEach(n => n.remove());
+      }
+      state.activeFormPanel = null;
+      state.pendingForm = null;
+      await pushNextPlanQuestion({ announceIdle: true });
+    } catch (e) {
+      addBubble('system', '发送失败：' + e.message);
+    } finally {
+      state.processing = false;
+      el.sendBtn.disabled = false;
+      el.msgInput.disabled = false;
+    }
+  }
+
+  function taskTag(task) {
+    return '术后随访 · D' + (task.dayOffset || '');
+  }
+
+  /** 系统按随访计划推送下一条待答问题 */
+  async function pushNextPlanQuestion(opts) {
+    opts = opts || {};
+    if (!state.patientId) return;
+    const res = await fetch('/api/patient/mock/tasks?patientId=' + state.patientId);
+    const tasks = await res.json();
+    if (!Array.isArray(tasks) || !tasks.length) {
+      if (opts.announceIdle) {
+        addBubble('system', '当前没有到期待办。到点后系统会按飞书随访计划自动发送「术后随访」问题，请届时打开本页回答。');
+      }
+      state.pendingTaskId = null;
+      state.activeFormPanel = null;
+      state.pendingForm = null;
+      return;
+    }
+    let next = tasks.find(t => !state.askedTaskIds.has(String(t.taskId)));
+    if (!next) next = tasks[0];
+    state.pendingTaskId = next.taskId;
+    const id = String(next.taskId);
+    if (!state.askedTaskIds.has(id) || opts.force) {
+      state.askedTaskIds.add(id);
+      const prompt = (next.form && next.form.title)
+        ? String(next.form.title)
+        : (next.question || '请反馈今日恢复情况');
+      addBubble('system', prompt, taskTag(next), next.form || null);
+    }
+  }
+
+  async function login() {
+    el.loginErr.textContent = '';
+    const code = el.codeInput.value.replace(/\D/g, '');
+    if (code.length !== 8) {
+      el.loginErr.textContent = '请输入完整的 8 位数字病患码';
+      return;
+    }
+    el.btnLogin.disabled = true;
+    try {
+      const res = await fetch('/api/bind/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || data.message || '登录失败');
+      state.patientId = data.patientId;
+      state.name = data.patientName || '';
+      state.diagnosis = data.diagnosis || '';
+      state.code = data.code || code;
+      state.askedTaskIds = new Set();
+      localStorage.setItem('care_web_session', JSON.stringify({
+        patientId: state.patientId, name: state.name, diagnosis: state.diagnosis, code: state.code
+      }));
+      enterApp(data.welcome);
+    } catch (e) {
+      el.loginErr.textContent = e.message;
+    } finally {
+      el.btnLogin.disabled = false;
+    }
+  }
+
+  function enterApp(welcome) {
+    el.loginView.classList.add('hidden');
+    el.app.classList.remove('hidden');
+    el.patientLine.textContent = (state.name || '患者') + ' · ' + (state.diagnosis || '') + ' · 码 ' + state.code;
+    el.chatMessages.querySelectorAll('.message').forEach(n => n.remove());
+    el.emptyHint.classList.remove('hidden');
+    addBubble('system', welcome || ('您好，' + state.name + '。我是您的随访助手，将按医生在飞书确认的计划，用一张随访表收集恢复情况。'));
+    pushNextPlanQuestion({ announceIdle: true, force: true }).catch(e => addBubble('system', '加载任务失败：' + e.message));
+    setTimeout(() => el.msgInput.focus(), 300);
+  }
+
+  function renderMetrics(d) {
+    const items = [
+      ['❤️ 心率', d.heartRate, 'bpm'],
+      ['❤️ 静息心率', d.restingHeartRate, 'bpm'],
+      ['🩸 血压', d.bloodPressure, 'mmHg'],
+      ['🫧 血氧', d.spo2, '%'],
+      ['👣 步数', d.steps, '今日'],
+      ['🔥 热量', d.calories, 'kcal'],
+      ['😴 睡眠', d.sleepHours, '小时'],
+      ['💤 深睡', d.sleepDeepMin, '分钟'],
+      ['🌙 浅睡', d.sleepLightMin, '分钟'],
+      ['🧠 REM', d.sleepRemMin, '分钟'],
+      ['📈 HRV', d.hrvRmssd, 'ms'],
+      ['🌡 皮温', d.skinTemp, '℃'],
+      ['😌 压力', d.stressScore, '分']
+    ];
+    el.metricGrid.innerHTML = items.map(([k, v, u]) =>
+      '<div class="metric-card"><div class="label">' + k + '</div><div class="value">' + v
+      + '</div><div class="sub">' + u + '</div></div>'
+    ).join('');
+    el.lastSync.textContent = '⏱ 最后同步：' + (d.syncedAt || '刚刚');
+  }
+
+  async function syncDevice() {
+    if (!state.patientId) return;
+    el.connectBtn.disabled = true;
+    el.connectStatusText.textContent = '连接中…';
+    el.connectBtn.textContent = '⏳ 连接中';
+    try {
+      await new Promise(r => setTimeout(r, 800));
+      const res = await fetch('/api/patient/mock/device/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ patientId: String(state.patientId) })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '同步失败');
+      state.deviceConnected = true;
+      el.deviceConnect.style.display = 'none';
+      el.deviceData.classList.add('visible');
+      renderMetrics(data);
+      if (state.mode === 'followup') {
+        addBubble('system', '已同步手环数据：心率 ' + data.heartRate + '，血压 ' + data.bloodPressure + '，血氧 ' + data.spo2 + '%。将随随访报告汇总给医生。');
+      }
+    } catch (e) {
+      el.connectStatusText.textContent = '连接失败';
+      el.connectBtn.textContent = '🔗 重试连接';
+      alert(e.message);
+    } finally {
+      el.connectBtn.disabled = false;
+    }
+  }
+
+  function switchMode(mode) {
+    state.mode = mode;
+    document.querySelectorAll('.mode-tab').forEach(tab => {
+      const on = tab.dataset.mode === mode;
+      tab.classList.toggle('active', on);
+    });
+    el.modeBadge.textContent = mode === 'followup' ? '助手' : '设备';
+    el.chatMessages.classList.toggle('hidden', mode !== 'followup');
+    el.dashboardPanel.classList.toggle('hidden', mode !== 'device');
+    el.inputArea.classList.toggle('hidden', mode !== 'followup');
+    if (mode === 'followup') setTimeout(() => el.msgInput.focus(), 200);
+  }
+
+  document.querySelectorAll('.mode-tab').forEach(tab => {
+    tab.addEventListener('click', () => switchMode(tab.dataset.mode));
+  });
+  el.btnLogin.addEventListener('click', login);
+  el.codeInput.addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 8);
+  });
+  el.codeInput.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+  el.sendBtn.addEventListener('click', sendAnswer);
+  el.msgInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAnswer(); }
+  });
+  el.msgInput.addEventListener('input', autoResize);
+  el.connectBtn.addEventListener('click', syncDevice);
+  el.resyncBtn.addEventListener('click', syncDevice);
+  el.refreshFab.addEventListener('click', () => {
+    pushNextPlanQuestion({ announceIdle: true, force: true }).catch(e => alert(e.message));
+  });
+  el.logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('care_web_session');
+    location.reload();
+  });
+
+  // 恢复会话
+  (async () => {
+    try {
+      const raw = localStorage.getItem('care_web_session');
+      if (!raw) return;
+      const s = JSON.parse(raw);
+      if (!s.patientId || !s.code) return;
+      state.patientId = s.patientId;
+      state.name = s.name;
+      state.diagnosis = s.diagnosis;
+      state.code = s.code;
+      enterApp('欢迎回来，' + state.name + '。正在按随访计划检查待办…');
+    } catch (e) { /* ignore */ }
+  })();
+})();
+</script>
+</body>
+</html>

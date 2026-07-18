@@ -1,0 +1,101 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "登录",
+        "app-plus": {
+          "titleNView": false,
+          "bounce": "none"
+        }
+      }
+    },
+    {
+      "path": "pages/today/today",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "今日",
+        "app-plus": {
+          "titleNView": false,
+          "bounce": "none"
+        }
+      }
+    },
+    {
+      "path": "pages/chat/chat",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "随访",
+        "app-plus": {
+          "titleNView": false,
+          "bounce": "none",
+          "softinputMode": "adjustResize"
+        }
+      }
+    },
+    {
+      "path": "pages/device/device",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "设备",
+        "app-plus": {
+          "titleNView": false,
+          "bounce": "none"
+        }
+      }
+    },
+    {
+      "path": "pages/mine/mine",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "我的",
+        "app-plus": {
+          "titleNView": false,
+          "bounce": "none"
+        }
+      }
+    }
+  ],
+  "tabBar": {
+    "color": "#94a3b8",
+    "selectedColor": "#168b76",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/today/today",
+        "text": "今日",
+        "iconPath": "static/tab/today-idle.png",
+        "selectedIconPath": "static/tab/today-active.png"
+      },
+      {
+        "pagePath": "pages/chat/chat",
+        "text": "随访",
+        "iconPath": "static/tab/chat-idle.png",
+        "selectedIconPath": "static/tab/chat-active.png"
+      },
+      {
+        "pagePath": "pages/device/device",
+        "text": "设备",
+        "iconPath": "static/tab/device-idle.png",
+        "selectedIconPath": "static/tab/device-active.png"
+      },
+      {
+        "pagePath": "pages/mine/mine",
+        "text": "我的",
+        "iconPath": "static/tab/mine-idle.png",
+        "selectedIconPath": "static/tab/mine-active.png"
+      }
+    ]
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "CareLoop",
+    "navigationBarBackgroundColor": "#f3f6f5",
+    "backgroundColor": "#f3f6f5",
+    "app-plus": {
+      "background": "#f3f6f5"
+    }
+  }
+}

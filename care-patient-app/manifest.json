@@ -1,0 +1,66 @@
+{
+    "name" : "智能随访",
+    "appid" : "__UNI__79E5434",
+    "description" : "术后智能随访患者端（病患码登录）",
+    "versionName" : "1.0.0",
+    "versionCode" : "100",
+    "transformPx" : false,
+    "app-plus" : {
+        "usingComponents" : true,
+        "nvueStyleCompiler" : "uni-app",
+        "compilerVersion" : 3,
+        "splashscreen" : {
+            "alwaysShowBeforeRender" : true,
+            "waiting" : true,
+            "autoclose" : true,
+            "delay" : 0
+        },
+        "modules" : {},
+        "distribute" : {
+            "android" : {
+                "permissions" : [
+                    "<uses-permission android:name=\"android.permission.INTERNET\"/>",
+                    "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>"
+                ],
+                "minSdkVersion" : 21,
+                "targetSdkVersion" : 33,
+                "abiFilters" : [ "armeabi-v7a", "arm64-v8a" ]
+            },
+            "ios" : {
+                "dSYMs" : false
+            },
+            "sdkConfigs" : {}
+        }
+    },
+    "quickapp" : {},
+    "mp-weixin" : {
+        "appid" : "",
+        "setting" : {
+            "urlCheck" : false,
+            "es6" : true,
+            "minified" : true
+        },
+        "usingComponents" : true
+    },
+    "mp-alipay" : {
+        "usingComponents" : true
+    },
+    "h5" : {
+        "title" : "智能随访",
+        "router" : {
+            "mode" : "hash"
+        },
+        "devServer" : {
+            "https" : false,
+            "port" : 5173,
+            "proxy" : {
+                "/api" : {
+                    "target" : "https://fromfreedom.top",
+                    "changeOrigin" : true,
+                    "secure" : true
+                }
+            }
+        }
+    },
+    "vueVersion" : "3"
+}

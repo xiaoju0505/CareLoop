@@ -1,0 +1,102 @@
+{
+  "id": "lumbar-fusion",
+  "title": "腰椎融合/减压术后",
+  "specialty": "骨科·脊柱",
+  "version": "2.1",
+  "priority": 100,
+  "matchKeywords": ["腰椎融合", "椎间融合", "椎管减压", "腰椎术后", "腰突手术", "脊柱内固定"],
+  "excludeKeywords": ["保守", "牵引", "未手术"],
+  "modules": {
+    "wound": true,
+    "meds": true,
+    "safety": true,
+    "anticoagulant": false
+  },
+  "expandDays": [1, 3, 7, 14],
+  "dayTitles": {
+    "1": "出院后首日",
+    "3": "神经症状复核",
+    "7": "一周复核",
+    "14": "诊前汇总"
+  },
+  "specialtyItems": [
+    {
+      "id": "leg_neuro",
+      "label": "【腰椎】下肢麻木/放射痛",
+      "frequency": "routine",
+      "multi": false,
+      "options": ["较术前好转", "差不多", "较术前加重", "新发明显麻木无力"],
+      "allowCustom": true,
+      "signalMap": {
+        "较术前加重": "YELLOW",
+        "新发明显麻木无力": "YELLOW"
+      }
+    },
+    {
+      "id": "bladder_bowel",
+      "label": "【腰椎】大小便控制",
+      "frequency": "routine",
+      "multi": false,
+      "options": ["正常", "稍有困难", "明显障碍/尿潴留感", "鞍区麻木"],
+      "allowCustom": true,
+      "signalMap": {
+        "明显障碍/尿潴留感": "RED",
+        "鞍区麻木": "RED"
+      }
+    },
+    {
+      "id": "brace_walk",
+      "label": "【腰椎】支具与活动",
+      "frequency": "expand",
+      "multi": false,
+      "options": ["按医嘱佩戴并可短距活动", "偶不戴支具", "因痛几乎不动", "不清楚医嘱"],
+      "allowCustom": true,
+      "signalMap": { "因痛几乎不动": "YELLOW" }
+    }
+  ],
+  "careTips": "按医嘱佩戴腰部支具、避免弯腰负重扭转、伤口干燥、记录下肢麻木放射痛、警惕鞍区麻木与大小便障碍、防跌倒",
+  "triageRules": [
+    {
+      "id": "red-cauda-equina",
+      "level": "RED",
+      "category": "脊柱·马尾急症",
+      "keywords": ["鞍区麻木", "大小便失禁", "尿潴留", "双下肢进行性无力", "会阴麻木"],
+      "reasonTemplate": "急症预警（{category}）",
+      "suggestedAction": "立即急诊"
+    },
+    {
+      "id": "yellow-neuro-worse",
+      "level": "YELLOW",
+      "category": "脊柱·神经加重",
+      "keywords": ["麻木加重", "放射痛加重", "较术前加重", "新发明显麻木"],
+      "reasonTemplate": "预警（{category}）",
+      "suggestedAction": "今日内复核"
+    },
+    {
+      "id": "yellow-brace",
+      "level": "YELLOW",
+      "category": "脊柱·支具依从",
+      "keywords": ["偶不戴支具", "不清楚医嘱", "因痛几乎不动"],
+      "reasonTemplate": "预警（{category}）",
+      "suggestedAction": "强化支具与活动指导"
+    }
+  ],
+  "patientReplies": {
+    "green": "请继续支具保护、避免弯腰负重。若鞍区麻木、大小便障碍或双下肢无力加重，请立即急诊。",
+    "yellow": "腰椎随访有需关注神经/伤口信号，已通知团队。请减少活动并观察。",
+    "red": "急症预警已通知。马尾或严重神经症状请立即急救。"
+  },
+  "briefingPriorityRules": [
+    {
+      "id": "ask-cauda",
+      "when": "always",
+      "ask": "大小便与鞍区感觉是否正常？"
+    },
+    {
+      "id": "ask-neuro",
+      "when": "always",
+      "ask": "下肢麻木/放射痛较术前好转还是加重？"
+    }
+  ],
+  "briefingAskList": ["下肢神经？", "大小便/鞍区？", "支具？", "伤口？"]
+}

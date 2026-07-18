@@ -1,0 +1,113 @@
+{
+  "id": "tka-knee",
+  "title": "膝关节置换术后",
+  "specialty": "骨科·关节置换",
+  "version": "2.1",
+  "priority": 100,
+  "matchKeywords": ["膝关节置换", "全膝置换", "TKA", "人工膝关节", "单髁置换", "膝置换"],
+  "excludeKeywords": ["保守治疗", "未手术", "仅膝痛", "注射治疗"],
+  "modules": {
+    "wound": true,
+    "meds": true,
+    "safety": true,
+    "anticoagulant": true
+  },
+  "expandDays": [1, 3, 7, 10, 14],
+  "dayTitles": {
+    "1": "出院后首日",
+    "3": "血栓高危窗",
+    "7": "一周功能复核",
+    "10": "复诊前强化",
+    "14": "诊前汇总"
+  },
+  "specialtyItems": [
+    {
+      "id": "swelling",
+      "label": "【膝置换】膝部/小腿肿胀",
+      "frequency": "routine",
+      "multi": false,
+      "options": ["双侧差不多", "膝肿但可接受", "单侧小腿更肿/胀痛", "皮温高或发紫"],
+      "allowCustom": true,
+      "signalMap": {
+        "单侧小腿更肿/胀痛": "YELLOW",
+        "皮温高或发紫": "YELLOW"
+      }
+    },
+    {
+      "id": "function_knee",
+      "label": "【膝置换】屈膝与活动",
+      "frequency": "expand",
+      "multi": false,
+      "options": ["较前改善", "差不多", "因痛不敢活动", "明显倒退"],
+      "allowCustom": true,
+      "signalMap": { "因痛不敢活动": "YELLOW", "明显倒退": "YELLOW" }
+    },
+    {
+      "id": "ankle_pump",
+      "label": "【膝置换】踝泵练习",
+      "frequency": "expand",
+      "multi": false,
+      "options": ["今天做过", "偶尔做", "几乎没做", "不清楚怎么做"],
+      "allowCustom": true
+    },
+    {
+      "id": "walking",
+      "label": "【膝置换】助行情况",
+      "frequency": "expand",
+      "multi": false,
+      "options": ["助行器短距可", "仍不敢下地", "独自冒险无保护", "行走距离较前增加"],
+      "allowCustom": true,
+      "signalMap": { "独自冒险无保护": "YELLOW", "仍不敢下地": "YELLOW" }
+    }
+  ],
+  "careTips": "抬高患肢高于心脏、伤口清洁干燥勿自行拆敷料、防跌倒（助行器+有人陪同）、按医嘱抗凝与止痛不可自行停药、冰敷15-20分钟/次、渐进屈膝与踝泵、对比双侧小腿",
+  "triageRules": [
+    {
+      "id": "yellow-knee-swelling",
+      "level": "YELLOW",
+      "category": "膝置换·肿胀",
+      "keywords": ["单侧小腿更肿", "皮温高或发紫", "膝肿明显加重"],
+      "reasonTemplate": "预警（{category}）",
+      "suggestedAction": "电话复核肿胀与抗凝"
+    },
+    {
+      "id": "yellow-knee-function",
+      "level": "YELLOW",
+      "category": "膝置换·功能回避",
+      "keywords": ["因痛不敢活动", "明显倒退", "仍不敢下地"],
+      "reasonTemplate": "预警（{category}）",
+      "suggestedAction": "评估镇痛与康复指导"
+    },
+    {
+      "id": "red-knee-neurovasc",
+      "level": "RED",
+      "category": "膝置换·急症",
+      "keywords": ["足趾发紫", "足背动脉摸不到", "整条腿不能动"],
+      "reasonTemplate": "急症预警（{category}）",
+      "suggestedAction": "立即就医"
+    }
+  ],
+  "patientReplies": {
+    "green": "膝部信号偏平稳。请继续抬高、踝泵、助行保护与按时抗凝止痛。若单侧小腿胀痛发紫、渗液增多或胸闷气促，请立即联系医院。",
+    "yellow": "您的膝置换随访中有需关注信号，我已通知团队。请减少负重、抬高患肢，勿停抗凝。加重请急诊或提前复诊。",
+    "red": "急症预警已通知医护。如胸闷气促、整条腿青紫或高热寒战，请立即急救。"
+  },
+  "briefingPriorityRules": [
+    {
+      "id": "ask-rom",
+      "when": "always",
+      "ask": "屈膝是否较前改善？助行距离如何？"
+    },
+    {
+      "id": "ask-calf",
+      "when": "swellingConcern",
+      "ask": "双侧小腿是否对称？有无单侧胀痛发紫？"
+    },
+    {
+      "id": "ask-anticoag-tka",
+      "when": "anticoagMiss",
+      "ask": "抗凝药名称与最近一次漏服情况？"
+    }
+  ],
+  "briefingAskList": ["屈膝改善？", "踝泵？", "抗凝漏服？", "小腿对称？"]
+}

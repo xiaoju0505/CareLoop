@@ -1,0 +1,30 @@
+# Build / IDE
+**/target/
+**/.idea/
+**/*.iml
+**/.vscode/
+**/.DS_Store
+**/Thumbs.db
+
+# UniApp
+**/unpackage/
+**/node_modules/
+**/.hbuilderx/
+
+# Secrets & local config
+.env
+.env.local
+**/.env
+!**/.env.example
+**/*.log
+**/application-local.yml
+**/application-prod.yml
+**/application-secret.yml
+
+# Docs / media (do not commit)
+**/docs/
+**/*.docx
+**/*.pdf
+
+# OS
+Desktop.ini

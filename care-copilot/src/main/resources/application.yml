@@ -1,0 +1,53 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: care-copilot
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/care_copilot?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: ${MYSQL_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+
+careloop:
+  public-base-url: https://fromfreedom.top
+  feishu:
+    app-id: ${FEISHU_APP_ID:}
+    app-secret: ${FEISHU_APP_SECRET:}
+    verification-token: ${FEISHU_VERIFICATION_TOKEN:}
+    encrypt-key: ${FEISHU_ENCRYPT_KEY:}
+  demo:
+    feishu-receive-id-type: ${FEISHU_DEMO_RECEIVE_ID_TYPE:chat_id}
+    feishu-receive-id: ${FEISHU_DEMO_RECEIVE_ID:}
+  schedule:
+    followup-delay-ms: 60000
+    briefing-delay-ms: 3600000
+  kb:
+    bitable:
+      enabled: false
+      app-token: ${FEISHU_BITABLE_APP_TOKEN:}
+      table-nodes: ${FEISHU_BITABLE_TABLE_NODES:}
+      table-rules: ${FEISHU_BITABLE_TABLE_RULES:}
+      table-domains: ${FEISHU_BITABLE_TABLE_DOMAINS:}
+      table-replies: ${FEISHU_BITABLE_TABLE_REPLIES:}
+      table-briefing: ${FEISHU_BITABLE_TABLE_BRIEFING:}
+      sync-on-startup: false
+      sync-interval-ms: 600000
+  ledger:
+    bitable:
+      enabled: false
+      # 复用 careloop.kb.bitable.app-token；在同一多维表新建「患者台账」表后填入 table-id
+      table-patients: ${FEISHU_BITABLE_TABLE_PATIENTS:}
+
+logging:
+  level:
+    com.careloop: INFO

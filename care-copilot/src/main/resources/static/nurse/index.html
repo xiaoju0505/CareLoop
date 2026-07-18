@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>CareLoop 骨科护士台</title>
+  <style>
+    :root {
+      --bg: #f3f1ec;
+      --ink: #1c2430;
+      --muted: #667085;
+      --line: #d9d2c5;
+      --card: #fffdf8;
+      --accent: #0f6a5a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 500px at 10% -10%, #d9efe8 0%, transparent 55%),
+        radial-gradient(900px 400px at 100% 0%, #f7e2d4 0%, transparent 50%),
+        var(--bg);
+      min-height: 100vh;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 28px 18px 48px; }
+    h1 { margin: 0 0 6px; font-size: 28px; }
+    h2 { margin: 0 0 12px; font-size: 18px; }
+    .sub { color: var(--muted); margin-bottom: 22px; }
+    .grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 16px; }
+    @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+    }
+    label { display:block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    input, select, button, textarea {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      padding: 12px 14px;
+      font: inherit;
+      background: #fff;
+    }
+    textarea { min-height: 72px; resize: vertical; }
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button.secondary { background: #2f3a4a; }
+    .row { display:grid; gap: 10px; margin-bottom: 12px; }
+    .row2 { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .actions { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .qr {
+      width: 260px; height: 260px; object-fit: contain;
+      border: 1px dashed var(--line); border-radius: 16px; background: #fff; margin: 8px auto; display:block;
+    }
+    .meta { font-size: 14px; line-height: 1.6; color: var(--muted); word-break: break-all; }
+    .tag {
+      display:inline-block; padding: 3px 8px; border-radius: 999px;
+      background: #e7f5f1; color: var(--accent); font-size: 12px; font-weight: 600;
+    }
+    .err { color: #b42318; white-space: pre-wrap; }
+    .node { border: 1px solid var(--line); border-radius: 12px; padding: 10px; margin-bottom: 8px; background:#fff; }
+    .node .row2 { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="tag">骨科 · 关节置换连续照护</div>
+    <h1>CareLoop 备用工作台</h1>
+    <p class="sub">主流程：医生在飞书发送电子病历即可自动识别建档。本页仅用于编辑随访节点、手动推送等备用操作。</p>
+
+    <div class="grid">
+      <section class="panel">
+        <h2>1. 患者病例</h2>
+        <div class="row2">
+          <div>
+            <label>姓名</label>
+            <input id="name" placeholder="张女士" />
+          </div>
+          <div>
+            <label>性别</label>
+            <input id="gender" placeholder="女" />
+          </div>
+        </div>
+        <div class="row2" style="margin-top:10px">
+          <div>
+            <label>诊断</label>
+            <input id="diagnosis" placeholder="膝关节置换术后" />
+          </div>
+          <div>
+            <label>主管医生</label>
+            <input id="doctorName" placeholder="李医生" />
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label>病例摘要 / 医嘱备注</label>
+            <textarea id="caseNotes" placeholder="手术日期、假体型号、术后注意事项…"></textarea>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="btnCreatePatient">新建病例</button>
+          <button id="btnUpdatePatient" class="secondary">更新当前患者</button>
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--line);margin:18px 0" />
+
+        <h2>2. 随访操作</h2>
+        <div class="row">
+          <div>
+            <label>患者 ID</label>
+            <input id="patientId" value="1" />
+          </div>
+          <div>
+            <label>飞书接收群 chat_id</label>
+            <input id="chatId" value="oc_f893f0069e83ee1e72b7d3552a4d69f1" />
+          </div>
+        </div>
+        <div class="actions">
+          <button id="btnIssue">生成专属二维码</button>
+          <button id="btnPlan" class="secondary">发送离院计划到飞书</button>
+        </div>
+        <div class="actions" style="margin-top:10px">
+          <button id="btnPush" class="secondary">推送下一条随访问题</button>
+          <button id="btnBrief" class="secondary">生成诊前简报</button>
+        </div>
+        <div class="actions" style="margin-top:10px">
+          <button id="btnKb" class="secondary">发布骨科知识库到飞书</button>
+          <button id="btnSyncBitable" class="secondary">同步多维表格知识库</button>
+        </div>
+        <p id="msg" class="meta" style="margin-top:14px"></p>
+        <p id="err" class="err"></p>
+      </section>
+
+      <section class="panel">
+        <div class="meta" id="info">尚未生成二维码</div>
+        <img id="qr" class="qr" alt="患者专属二维码" style="display:none" />
+        <div class="meta" id="link"></div>
+
+        <hr style="border:none;border-top:1px solid var(--line);margin:18px 0" />
+        <h2>3. 编辑随访节点（草稿）</h2>
+        <div class="row">
+          <div>
+            <label>计划 ID</label>
+            <input id="planId" placeholder="从飞书卡片或创建计划返回" />
+          </div>
+          <div>
+            <label>照护要点</label>
+            <input id="careTips" />
+          </div>
+        </div>
+        <div id="nodes"></div>
+        <div class="actions" style="margin-top:10px">
+          <button id="btnLoadPlan" class="secondary">加载计划</button>
+          <button id="btnSavePlan">保存并重发飞书</button>
+        </div>
+      </section>
+    </div>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const chatBody = () => ({
+      patientId: $('patientId').value,
+      receiveIdType: 'chat_id',
+      receiveId: $('chatId').value
+    });
+    async function post(url, body) {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || JSON.stringify(data));
+      return data;
+    }
+    async function put(url, body) {
+      const res = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || JSON.stringify(data));
+      return data;
+    }
+    async function get(url) {
+      const res = await fetch(url);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || JSON.stringify(data));
+      return data;
+    }
+
+    function renderNodes(nodes) {
+      const box = $('nodes');
+      box.innerHTML = '';
+      (nodes || []).forEach((n, idx) => {
+        const div = document.createElement('div');
+        div.className = 'node';
+        div.innerHTML = `
+          <div class="row2">
+            <div><label>第几天 D</label><input data-k="day" data-i="${idx}" value="${n.day ?? ''}" /></div>
+            <div><label>监测问题</label><input data-k="question" data-i="${idx}" value="${(n.question || '').replace(/"/g,'&quot;')}" /></div>
+          </div>`;
+        box.appendChild(div);
+      });
+      box.dataset.count = String((nodes || []).length);
+    }
+
+    function collectNodes() {
+      const count = Number($('nodes').dataset.count || 0);
+      const nodes = [];
+      for (let i = 0; i < count; i++) {
+        const dayEl = document.querySelector(`input[data-k="day"][data-i="${i}"]`);
+        const qEl = document.querySelector(`input[data-k="question"][data-i="${i}"]`);
+        nodes.push({ day: Number(dayEl.value), question: qEl.value });
+      }
+      return nodes;
+    }
+
+    $('btnCreatePatient').onclick = async () => {
+      $('err').textContent = '';
+      try {
+        const data = await post('/api/patients', {
+          name: $('name').value,
+          gender: $('gender').value,
+          diagnosis: $('diagnosis').value,
+          doctorName: $('doctorName').value,
+          caseNotes: $('caseNotes').value
+        });
+        $('patientId').value = data.id;
+        $('msg').textContent = `已建档 patientId=${data.id} ${data.name}`;
+      } catch (e) { $('err').textContent = e.message; }
+    };
+
+    $('btnUpdatePatient').onclick = async () => {
+      $('err').textContent = '';
+      try {
+        const id = $('patientId').value;
+        const data = await put('/api/patients/' + id, {
+          name: $('name').value || undefined,
+          gender: $('gender').value || undefined,
+          diagnosis: $('diagnosis').value || undefined,
+          doctorName: $('doctorName').value || undefined,
+          caseNotes: $('caseNotes').value || undefined
+        });
+        $('msg').textContent = `已更新患者 ${data.id} ${data.name}`;
+      } catch (e) { $('err').textContent = e.message; }
+    };
+
+    $('btnIssue').onclick = async () => {
+      $('err').textContent = '';
+      try {
+        const data = await post('/api/bind/issue', { patientId: $('patientId').value });
+        $('info').innerHTML = `<b>${data.patientName}</b> · ${data.diagnosis}<br/>token: ${data.token}`;
+        $('qr').style.display = 'block';
+        $('qr').src = data.qrApi + '?t=' + Date.now();
+        $('link').innerHTML = `扫码打开：<br/><a href="${data.bindUrl}" target="_blank">${data.bindUrl}</a>`;
+        $('msg').textContent = data.tip;
+      } catch (e) { $('err').textContent = e.message; }
+    };
+    $('btnPlan').onclick = async () => {
+      $('err').textContent = '';
+      try {
+        const data = await post('/api/demo/create-care-plan', chatBody());
+        $('planId').value = data.planId;
+        $('msg').textContent = `计划已发送飞书，planId=${data.planId}。可编辑节点后保存重发。`;
+        if (data.planId) await loadPlan(data.planId);
+      } catch (e) { $('err').textContent = e.message; }
+    };
+    $('btnPush').onclick = async () => {
+      $('err').textContent = '';
+      try {
+        const data = await post('/api/demo/push-followup', { patientId: $('patientId').value });
+        $('msg').textContent = data.pushed ? `已推送：${data.question}` : data.tip;
+      } catch (e) { $('err').textContent = e.message; }
+    };
+    $('btnBrief').onclick = async () => {
+      $('err').textContent = '';
+      try {
+        const data = await post('/api/demo/generate-briefing', chatBody());
+        $('msg').textContent = `诊前简报已发送，briefingId=${data.briefingId}，风险=${data.riskLevel}`;
+      } catch (e) { $('err').textContent = e.message; }
+    };
+    $('btnKb').onclick = async () => {
+      $('err').textContent = '';
+      try {
+        const data = await post('/api/demo/publish-ortho-kb', {
+          receiveIdType: 'chat_id',
+          receiveId: $('chatId').value
+        });
+        $('msg').textContent = data.tip + (data.docUrl ? (' 文档=' + data.docUrl) : '');
+      } catch (e) { $('err').textContent = e.message; }
+    };
+    $('btnSyncBitable').onclick = async () => {
+      $('err').textContent = '';
+      try {
+        const data = await post('/api/kb/ortho/sync-bitable', {});
+        $('msg').textContent = `已同步多维表格：nodes=${data.nodes} rules=${data.rules} source=${data.source}`;
+      } catch (e) { $('err').textContent = e.message; }
+    };
+
+    async function loadPlan(id) {
+      const data = await get('/api/care-plans/' + id);
+      const content = data.content || {};
+      $('careTips').value = content.careTips || '';
+      renderNodes(content.nodes || []);
+      $('msg').textContent = `已加载计划 ${id} 状态=${data.status}`;
+    }
+    $('btnLoadPlan').onclick = async () => {
+      $('err').textContent = '';
+      try { await loadPlan($('planId').value); }
+      catch (e) { $('err').textContent = e.message; }
+    };
+    $('btnSavePlan').onclick = async () => {
+      $('err').textContent = '';
+      try {
+        const data = await put('/api/care-plans/' + $('planId').value + '/nodes', {
+          nodes: collectNodes(),
+          careTips: $('careTips').value,
+          resendCard: true,
+          receiveIdType: 'chat_id',
+          receiveId: $('chatId').value
+        });
+        $('msg').textContent = `已保存并重发飞书确认卡 planId=${data.planId}`;
+      } catch (e) { $('err').textContent = e.message; }
+    };
+
+    // 支持 /nurse?planId=xx
+    const qs = new URLSearchParams(location.search);
+    if (qs.get('planId')) {
+      $('planId').value = qs.get('planId');
+      loadPlan(qs.get('planId')).catch(e => $('err').textContent = e.message);
+    }
+  </script>
+</body>
+</html>

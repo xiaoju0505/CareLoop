@@ -1,0 +1,349 @@
+{
+  "id": "ortho-common",
+  "title": "骨科通用连续照护",
+  "specialty": "骨科",
+  "version": "2.1-protocol",
+  "disclaimer": "本知识库用于院外随访辅助决策与可解释分诊，不替代面诊、影像与急诊判断。遇急症信号优先拨打急救或就近急诊。",
+  "careTips": "按医嘱用药与复诊、伤口清洁干燥勿自行拆敷料、防跌倒、对比双侧肢体、警惕感染与血栓/神经急症信号",
+  "welcomeExtra": "我会按医生确认的计划用一张随访表收集恢复情况，大约2分钟。",
+  "missedPolicy": { "catchUpMaxDays": 1 },
+  "shortForm": {
+    "enabled": true,
+    "consecutiveGreenDays": 3,
+    "itemIds": ["respondent", "trend", "redflag", "note"]
+  },
+  "schedulePolicy": {
+    "denseThroughDay": 7,
+    "afterDenseStep": 2,
+    "defaultFollowupDays": 14,
+    "defaultCollectHour": 20,
+    "defaultCollectMinute": 0
+  },
+  "editPolicy": {
+    "doctorCanChange": ["followupDays", "collectTime", "doctorExtras", "diseaseId"],
+    "mustChangeInKb": ["triageRules", "redSignals", "signalMap"]
+  },
+  "modules": {
+    "trend": true,
+    "temp": true,
+    "pain": true,
+    "wound": true,
+    "meds": true,
+    "redflag": true,
+    "safety": true,
+    "note": true,
+    "respondent": true
+  },
+  "formItems": [
+    {
+      "id": "respondent",
+      "label": "本次由谁填写",
+      "type": "choice",
+      "multi": false,
+      "options": ["患者本人", "家属代答"],
+      "allowCustom": false,
+      "shortFormInclude": true,
+      "phase": "always"
+    },
+    {
+      "id": "sec_common",
+      "type": "section",
+      "label": "一、骨科通用情况",
+      "phase": "always"
+    },
+    {
+      "id": "trend",
+      "label": "相对昨天",
+      "labelFirstDay": "出院以来整体感觉",
+      "type": "choice",
+      "multi": false,
+      "options": ["更好", "差不多", "变差"],
+      "optionsFirstDay": ["逐渐好转", "差不多", "变差"],
+      "allowCustom": true,
+      "customHint": "变化补充",
+      "shortFormInclude": true,
+      "signalMap": { "变差": "YELLOW" },
+      "phase": "always"
+    },
+    {
+      "id": "temp",
+      "label": "今天最高体温",
+      "type": "choice",
+      "multi": false,
+      "options": ["今天没量", "低于37.5℃", "37.5-38.0℃", "38.1-38.4℃", "≥38.5℃"],
+      "allowCustom": true,
+      "customHint": "体温补充",
+      "shortFormInclude": false,
+      "signalMap": {
+        "37.5-38.0℃": "YELLOW",
+        "38.1-38.4℃": "YELLOW",
+        "≥38.5℃": "RED"
+      },
+      "phase": "always"
+    },
+    {
+      "id": "pain",
+      "label": "疼痛程度",
+      "type": "choice",
+      "multi": false,
+      "options": ["无疼痛", "轻微疼痛", "中度疼痛", "剧痛"],
+      "allowCustom": true,
+      "customHint": "疼痛补充",
+      "shortFormInclude": false,
+      "signalMap": { "中度疼痛": "YELLOW", "剧痛": "YELLOW" },
+      "phase": "always"
+    },
+    {
+      "id": "sleep_pain",
+      "label": "是否因疼痛影响睡眠",
+      "type": "choice",
+      "multi": false,
+      "options": ["否", "是（曾痛醒或难入睡）"],
+      "allowCustom": true,
+      "showIf": { "pain": ["中度疼痛", "剧痛"] },
+      "shortFormInclude": false,
+      "signalMap": { "是（曾痛醒或难入睡）": "YELLOW" },
+      "phase": "always"
+    },
+    {
+      "id": "wound",
+      "label": "伤口/切口情况",
+      "type": "choice",
+      "multi": false,
+      "options": ["干燥", "少量渗液", "渗湿加重/红肿", "裂开或异味/流脓"],
+      "allowCustom": true,
+      "customHint": "伤口补充",
+      "shortFormInclude": false,
+      "signalMap": {
+        "渗湿加重/红肿": "YELLOW",
+        "裂开或异味/流脓": "RED"
+      },
+      "phase": "always",
+      "module": "wound"
+    },
+    {
+      "id": "analgesic",
+      "label": "止痛药",
+      "type": "choice",
+      "multi": false,
+      "options": ["已按时", "偶有漏服", "自行减量/停药", "医嘱未开/不需要", "不清楚"],
+      "allowCustom": true,
+      "customHint": "止痛补充",
+      "shortFormInclude": false,
+      "signalMap": { "自行减量/停药": "YELLOW", "偶有漏服": "YELLOW" },
+      "phase": "always",
+      "module": "meds"
+    },
+    {
+      "id": "anticoagulant",
+      "label": "抗凝药",
+      "type": "choice",
+      "multi": false,
+      "options": ["已按时", "偶有漏服", "自行减量/停药", "医嘱未开抗凝", "不清楚"],
+      "allowCustom": true,
+      "customHint": "抗凝补充",
+      "shortFormInclude": false,
+      "signalMap": { "自行减量/停药": "YELLOW", "偶有漏服": "YELLOW" },
+      "phase": "always",
+      "module": "anticoagulant"
+    },
+    {
+      "id": "redflag",
+      "label": "急症相关",
+      "type": "choice",
+      "multi": false,
+      "exclusive": true,
+      "options": ["无以上情况", "发热感", "单侧肢体明显胀痛/发紫", "气短/胸闷", "感觉或活动突然变差"],
+      "allowCustom": true,
+      "customHint": "其他急症不适",
+      "shortFormInclude": true,
+      "signalMap": {
+        "发热感": "YELLOW",
+        "单侧肢体明显胀痛/发紫": "YELLOW",
+        "气短/胸闷": "RED",
+        "感觉或活动突然变差": "RED"
+      },
+      "phase": "always"
+    },
+    {
+      "id": "safety",
+      "label": "防跌倒与安全",
+      "type": "choice",
+      "multi": false,
+      "options": ["有保护下地/休息为主", "偶有独自短距", "曾差点跌倒", "已跌倒"],
+      "allowCustom": true,
+      "shortFormInclude": false,
+      "signalMap": { "曾差点跌倒": "YELLOW", "已跌倒": "RED" },
+      "phase": "always",
+      "module": "safety"
+    },
+    {
+      "id": "note",
+      "label": "今日最想告诉医生的一句话",
+      "type": "text",
+      "allowCustom": true,
+      "customHint": "选填，建议填写",
+      "shortFormInclude": true,
+      "phase": "always"
+    }
+  ],
+  "skipReasons": ["太累/疼痛无法填写", "外出不在家", "已住院/急诊", "家属不在无法代答", "其他"],
+  "monitoringDomains": [
+    {
+      "id": "wound",
+      "name": "伤口与感染",
+      "why": "早期识别感染与切口并发症",
+      "greenSignals": ["敷料基本干燥", "渗血较前减少", "无异味", "体温正常"],
+      "yellowSignals": ["渗液增多或敷料渗湿", "局部红肿热痛加重", "低热37.5-38.0"],
+      "redSignals": ["大量渗液或流脓", "高热≥38.5", "伤口明显裂开"]
+    },
+    {
+      "id": "pain",
+      "name": "疼痛",
+      "why": "评估镇痛是否充分",
+      "greenSignals": ["无疼痛或轻微疼痛"],
+      "yellowSignals": ["中度疼痛", "痛醒"],
+      "redSignals": ["剧痛伴苍白麻木", "突然剧痛不能活动"]
+    },
+    {
+      "id": "meds",
+      "name": "用药依从",
+      "why": "抗凝与止痛依从分开评估",
+      "greenSignals": ["按医嘱服用"],
+      "yellowSignals": ["漏服", "自行停药"],
+      "redSignals": ["抗凝后大出血", "严重过敏"]
+    },
+    {
+      "id": "vte",
+      "name": "血栓与心肺",
+      "why": "DVT/PE零容忍",
+      "greenSignals": ["双侧对称", "无胸闷气促"],
+      "yellowSignals": ["单侧胀痛/皮温高"],
+      "redSignals": ["胸痛", "呼吸困难", "咳血", "晕厥"]
+    },
+    {
+      "id": "safety",
+      "name": "防跌倒",
+      "why": "跌倒可致脱位骨折",
+      "greenSignals": ["有保护下地"],
+      "yellowSignals": ["差点跌倒"],
+      "redSignals": ["已跌倒且剧痛"]
+    }
+  ],
+  "triageRules": [
+    {
+      "id": "red-cardio-vte",
+      "level": "RED",
+      "category": "心肺/血栓急症",
+      "keywords": ["胸痛", "呼吸困难", "气促", "喘不上气", "咳血", "整条腿青紫", "晕厥", "昏迷", "气短/胸闷"],
+      "reasonTemplate": "急症预警（{category}）",
+      "suggestedAction": "建议立即急诊评估"
+    },
+    {
+      "id": "red-infection-bleed",
+      "level": "RED",
+      "category": "严重感染/出血",
+      "keywords": ["流脓", "大量渗液", "大出血", "38.5", "高烧", "寒战", "裂开或异味/流脓", "≥38.5℃"],
+      "reasonTemplate": "急症预警（{category}）",
+      "suggestedAction": "建议立即就医"
+    },
+    {
+      "id": "yellow-wound",
+      "level": "YELLOW",
+      "category": "伤口预警",
+      "keywords": ["渗液", "渗湿", "红肿", "渗湿加重", "37.5", "发热感"],
+      "reasonTemplate": "预警（{category}）",
+      "suggestedAction": "今日复核伤口"
+    },
+    {
+      "id": "yellow-pain",
+      "level": "YELLOW",
+      "category": "疼痛预警",
+      "keywords": ["剧痛", "中度疼痛", "痛醒", "影响睡眠"],
+      "reasonTemplate": "预警（{category}）",
+      "suggestedAction": "评估镇痛与睡眠"
+    },
+    {
+      "id": "yellow-anticoag",
+      "level": "YELLOW",
+      "category": "抗凝依从预警",
+      "keywords": ["停抗凝", "漏服抗凝", "抗凝药：偶有漏服", "抗凝药：自行减量"],
+      "reasonTemplate": "预警（{category}）",
+      "suggestedAction": "电话随访抗凝，强调不可擅自停"
+    },
+    {
+      "id": "yellow-analgesic",
+      "level": "YELLOW",
+      "category": "止痛依从预警",
+      "keywords": ["止痛药：自行减量", "止痛药：偶有漏服", "止痛没用"],
+      "reasonTemplate": "预警（{category}）",
+      "suggestedAction": "评估镇痛方案"
+    },
+    {
+      "id": "yellow-dvt",
+      "level": "YELLOW",
+      "category": "肿胀/血栓早期",
+      "keywords": ["单侧", "小腿胀", "发紫", "皮温高", "单侧肢体明显胀痛"],
+      "reasonTemplate": "预警（{category}）",
+      "suggestedAction": "尽快排除 DVT"
+    },
+    {
+      "id": "yellow-fall",
+      "level": "YELLOW",
+      "category": "跌倒预警",
+      "keywords": ["差点跌倒", "已跌倒", "摔了一跤"],
+      "reasonTemplate": "预警（{category}）",
+      "suggestedAction": "强化防跌倒并评估损伤"
+    }
+  ],
+  "patientReplies": {
+    "green": "您当前信号偏平稳。请继续按医嘱用药与保护患处。若渗液增多、发热、单侧肢体胀痛发紫、胸闷气促或疼痛明显加重，请立即告诉我并及时就医。",
+    "yellow": "您反馈中有需关注的信号，我已通知骨科团队。请减少负重、抬高患肢休息；不要自行拆敷料或停抗凝等关键药。若数小时内加重请急诊或提前复诊。",
+    "red": "当前为急症预警，我已紧急通知医护。如胸闷气促、大出血、高热寒战或整条腿青紫，请立即拨打急救，不要等待线上回复。",
+    "notifyAfterDoctor": "骨科医护已查看您的反馈。请按医嘱观察并继续规律用药。",
+    "earlyRecheck": "医生建议您提前复诊。请尽快联系骨科门诊；急症请直接急诊。"
+  },
+  "briefingOutline": ["identity", "risk", "conclusions", "openAlerts", "trend", "threeAsks", "detail"],
+  "briefingPriorityRules": [
+    {
+      "id": "ask-open-red",
+      "when": "openRed",
+      "ask": "未关闭红警事项目前症状是否仍在？是否已急诊/就医？"
+    },
+    {
+      "id": "ask-open-yellow",
+      "when": "openYellow",
+      "ask": "未关闭黄警（伤口/用药/肿胀等）目前是好转还是加重？"
+    },
+    {
+      "id": "ask-trend-worse",
+      "when": "trendWorse",
+      "ask": "近几日自述「变差」或疼痛升级，最明显变差的是哪一点？"
+    },
+    {
+      "id": "ask-anticoag-miss",
+      "when": "anticoagMiss",
+      "ask": "抗凝是否已恢复按时服用？漏服原因是什么？"
+    },
+    {
+      "id": "ask-wound",
+      "when": "woundConcern",
+      "ask": "伤口渗液/红肿较前如何？换药频率？"
+    },
+    {
+      "id": "ask-patient-priority",
+      "when": "always",
+      "ask": "今天最希望医生重点检查或解答的问题是什么？"
+    }
+  ],
+  "briefingAskList": [
+    "相对昨天/出院以来：更好/差不多/变差？",
+    "体温：有无测量？最高档？",
+    "疼痛：无/轻/中/剧？是否痛醒？",
+    "伤口：干燥/少量渗/渗湿加重/裂开异味？",
+    "止痛与抗凝是否分开按时？",
+    "急症筛查与防跌倒",
+    "患者主诉一句话",
+    "未关闭红黄事件"
+  ]
+}
