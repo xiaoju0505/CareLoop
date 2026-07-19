@@ -16,11 +16,18 @@ public class FeishuDoctorSessionStore {
         EDIT_PLAN,
         REPLY_PATIENT,
         IGNORE_NOTE,
-        BRIEF_IGNORE_NOTE
+        BRIEF_IGNORE_NOTE,
+        /** 自然语言高危操作待确认 */
+        CONFIRM_NL
     }
 
     public record Session(Mode mode, long planId, long patientId, long alertId,
-                          String chatId, Instant expireAt) {
+                          String chatId, Instant expireAt, String pendingActionJson) {
+        public Session(Mode mode, long planId, long patientId, long alertId,
+                       String chatId, Instant expireAt) {
+            this(mode, planId, patientId, alertId, chatId, expireAt, null);
+        }
+
         public boolean expired() {
             return Instant.now().isAfter(expireAt);
         }
@@ -46,6 +53,11 @@ public class FeishuDoctorSessionStore {
     public void startBriefIgnoreNote(String chatId, long patientId, long briefingId) {
         byChat.put(chatId, new Session(Mode.BRIEF_IGNORE_NOTE, 0L, patientId, briefingId, chatId,
                 Instant.now().plusSeconds(1800)));
+    }
+
+    public void startConfirmNl(String chatId, String pendingActionJson) {
+        byChat.put(chatId, new Session(Mode.CONFIRM_NL, 0L, 0L, 0L, chatId,
+                Instant.now().plusSeconds(600), pendingActionJson));
     }
 
     public Session get(String chatId) {

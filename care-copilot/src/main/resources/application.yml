@@ -20,6 +20,11 @@ spring:
 
 careloop:
   public-base-url: https://fromfreedom.top
+  deepseek:
+    api-key: ${DEEPSEEK_API_KEY:}
+    base-url: https://api.deepseek.com
+    model: deepseek-chat
+    enabled: true
   feishu:
     app-id: ${FEISHU_APP_ID:}
     app-secret: ${FEISHU_APP_SECRET:}

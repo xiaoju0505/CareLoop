@@ -5,6 +5,7 @@ import com.careloop.care.CarePlanEditService;
 import com.careloop.caseintake.FeishuCaseIntakeService;
 import com.careloop.doctor.DoctorQueryService;
 import com.careloop.ledger.PatientLedgerService;
+import com.careloop.llm.DoctorNlCommandService;
 import com.careloop.patient.PatientNotifyService;
 import com.careloop.session.FeishuDoctorSessionStore;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,6 +31,7 @@ public class FeishuDoctorMessageRouter {
     private final FeishuMessageService feishuMessageService;
     private final PatientLedgerService patientLedgerService;
     private final AlertActionService alertActionService;
+    private final DoctorNlCommandService doctorNlCommandService;
     private final JdbcTemplate jdbcTemplate;
     private final ObjectMapper objectMapper;
 
@@ -41,6 +43,7 @@ public class FeishuDoctorMessageRouter {
                                      FeishuMessageService feishuMessageService,
                                      PatientLedgerService patientLedgerService,
                                      AlertActionService alertActionService,
+                                     DoctorNlCommandService doctorNlCommandService,
                                      JdbcTemplate jdbcTemplate,
                                      ObjectMapper objectMapper) {
         this.sessionStore = sessionStore;
@@ -51,6 +54,7 @@ public class FeishuDoctorMessageRouter {
         this.feishuMessageService = feishuMessageService;
         this.patientLedgerService = patientLedgerService;
         this.alertActionService = alertActionService;
+        this.doctorNlCommandService = doctorNlCommandService;
         this.jdbcTemplate = jdbcTemplate;
         this.objectMapper = objectMapper;
     }
@@ -154,7 +158,11 @@ public class FeishuDoctorMessageRouter {
                         sent ? "已回复患者#" + patientId : "已记录给患者#" + patientId);
                 return;
             }
-            // 演示：查某某最近恢复情况 → 汇总；数据不足则问患者
+            // DeepSeek 代理：理解意图并选工具执行（始终回复，避免静默）
+            if (doctorNlCommandService.tryHandle(trimmed, chatId)) {
+                return;
+            }
+            // 未走代理时：查恢复等固定句式
             if (doctorQueryService.tryHandle(trimmed, chatId)) {
                 return;
             }

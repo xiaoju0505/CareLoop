@@ -187,7 +187,7 @@ public class AlertActionService {
             }
             return "已记录：电话随访" + (patientId == null ? "" : "（患者#" + patientId + "）");
         }
-        if ("BRIEF_EARLY".equals(action)) {
+        if ("BRIEF_EARLY".equals(action) || "EARLY_RECHECK".equals(action)) {
             Long patientId = resolvePatientId(alertId, planId);
             writeDoctorAction(alertId, "EARLY_RECHECK", operatorOpenId, null);
             if (patientId != null) {
